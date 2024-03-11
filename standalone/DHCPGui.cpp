@@ -5,7 +5,9 @@
     This file based on https://msdn.microsoft.com/en-us/library/ms682425%28VS.85%29.aspx
 */
 
-#include <windows.h> #include <stdio.h> #include <tchar.h>
+#include <windows.h>
+#include <stdio.h>
+#include <tchar.h>
 
 int _tmain( int argc, TCHAR *argv[] )
 {
