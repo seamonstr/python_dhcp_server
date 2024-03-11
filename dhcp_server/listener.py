@@ -1,4 +1,8 @@
 #!/usr/bin/python3
+
+# This library is a fork of the original dhcp_server library by @miketeo
+# GitHub: https://github.com/niccokunzmann/python_dhcp_server/
+
 from socket import *
 
 import struct
@@ -156,7 +160,7 @@ class ReadBootProtocolPacket(object):
         self.port = address[1]
 
         # wireshark = wikipedia = data[...]
-        
+
         self.message_type = self.OP =                data[0]
         self.hardware_type = self.HTYPE =            data[1]
         self.hardware_address_length = self.HLEN =   data[2]

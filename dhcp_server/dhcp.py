@@ -1,14 +1,15 @@
-#!/usr/bin/python3
+# This library is a fork of the original dhcp_server library by @miketeo
+# GitHub: https://github.com/niccokunzmann/python_dhcp_server/
+
 import time
 import threading
 import struct
 import queue
 import collections
 import traceback
-import random
 import socket
 
-from listener import *
+from .listener import *
 
 def get_host_ip_addresses():
     return gethostbyname_ex(gethostname())[2]
@@ -35,7 +36,7 @@ class WriteBootProtocolPacket(object):
     magic_cookie = '99.130.83.99'
 
     parameter_order = []
-    
+
     def __init__(self, configuration):
         for i in range(256):
             names = ['option_{}'.format(i)]
@@ -47,7 +48,7 @@ class WriteBootProtocolPacket(object):
 
     def to_bytes(self):
         result = bytearray(236)
-        
+
         result[0] = self.message_type
         result[1] = self.hardware_type
         result[2] = self.hardware_address_length
@@ -64,7 +65,7 @@ class WriteBootProtocolPacket(object):
         result[24:28] = inet_aton(self.relay_agent_ip_address)
 
         result[28:28 + self.hardware_address_length] = macpack(self.client_mac_address)
-        
+
         result += inet_aton(self.magic_cookie)
 
         if self.options:
@@ -88,7 +89,7 @@ class WriteBootProtocolPacket(object):
         if function and value is not None:
             value = function(value)
         return value
-    
+
     @property
     def options(self):
         done = list()
@@ -134,7 +135,7 @@ class DelayWorker(object):
                     self.queue.put(p)
                 else:
                     func(*args, **kw)
-            except queue.Empty: 
+            except queue.Empty:
                 continue
 
     def do_after(self, seconds, func, args = (), kw = {}):
@@ -184,7 +185,7 @@ class Transaction(object):
         offer.parameter_order = discovery.parameter_request_list
         mac = discovery.client_mac_address
         ip = offer.your_ip_address = self.server.get_ip_address(discovery)
-        # offer.client_ip_address = 
+        # offer.client_ip_address =
         offer.transaction_id = discovery.transaction_id
         # offer.next_server_ip_address =
         offer.relay_agent_ip_address = discovery.relay_agent_ip_address
@@ -194,9 +195,9 @@ class Transaction(object):
         offer.dhcp_message_type = 'DHCPOFFER'
         offer.client_identifier = mac
         self.server.broadcast(offer)
-    
+
     def received_dhcp_request(self, request):
-        if self.is_done(): return 
+        if self.is_done(): return
         self.server.client_has_chosen(request)
         self.acknowledge(request)
         self.close()
@@ -221,7 +222,7 @@ class Transaction(object):
         self.server.client_has_chosen(inform)
 
 class DHCPServerConfiguration(object):
-    
+
     dhcp_offer_after_seconds = 10
     dhcp_acknowledge_after_seconds = 10
     length_of_transaction = 40
@@ -295,7 +296,7 @@ class NETWORK(object):
         return ip & self.subnet_mask == self.network and \
                ip - self.network and \
                ip - self.network != ~self.subnet_mask & 0xffffffff
-        
+
 class CASEINSENSITIVE(object):
     def __init__(self, s):
         self.s = s.lower()
@@ -372,7 +373,7 @@ class Host(object):
 
     def has_valid_ip(self):
         return self.ip and self.ip != '0.0.0.0'
-        
+
 
 class HostDatabase(object):
     def __init__(self, file_name):
@@ -398,7 +399,7 @@ class HostDatabase(object):
     def replace(self, host):
         self.delete(host)
         self.add(host)
-        
+
 def sorted_hosts(hosts):
     hosts = list(hosts)
     hosts.sort(key = lambda host: (host.hostname.lower(), host.mac.lower(), host.ip.lower()))
@@ -448,7 +449,7 @@ class DHCPServer(object):
     def received(self, packet):
         if not self.transactions[packet.transaction_id].receive(packet):
             self.configuration.debug('received:\n {}'.format(str(packet).replace('\n', '\n\t')))
-            
+
     def client_has_chosen(self, packet):
         self.configuration.debug('client_has_chosen:\n {}'.format(str(packet).replace('\n', '\n\t')))
         host = Host.from_packet(packet)
@@ -543,14 +544,3 @@ class DHCPServer(object):
 
     def get_current_hosts(self):
         return sorted_hosts(self.hosts.get(last_used = GREATER(self.time_started)))
-
-if __name__ == '__main__':
-    configuration = DHCPServerConfiguration()
-    configuration.debug = print
-    configuration.adjust_if_this_computer_is_a_router()
-    configuration.router #+= ['192.168.0.1']
-    configuration.ip_address_lease_time = 60
-    server = DHCPServer(configuration)
-    for ip in server.configuration.all_ip_addresses():
-        assert ip == server.configuration.network_filter()
-    server.run()

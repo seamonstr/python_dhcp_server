@@ -1,7 +1,10 @@
 #!/bin/sh
-#
+
+# This library is a fork of the original dhcp_server library by @miketeo
+# GitHub: https://github.com/niccokunzmann/python_dhcp_server/
+
 # Shortcut to start the gui with a terminal and ask for the password.
-# 
+#
 
 HERE="`dirname \"$0\"`"
 

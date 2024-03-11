@@ -1,9 +1,11 @@
+/*
+    This library is a fork of the original dhcp_server library by @miketeo
+    GitHub: https://github.com/niccokunzmann/python_dhcp_server/
 
-// based on https://msdn.microsoft.com/en-us/library/ms682425%28VS.85%29.aspx
+    This file based on https://msdn.microsoft.com/en-us/library/ms682425%28VS.85%29.aspx
+*/
 
-#include <windows.h>
-#include <stdio.h>
-#include <tchar.h>
+#include <windows.h> #include <stdio.h> #include <tchar.h>
 
 int _tmain( int argc, TCHAR *argv[] )
 {
@@ -16,7 +18,7 @@ int _tmain( int argc, TCHAR *argv[] )
     si.cb = sizeof(si);
     ZeroMemory( &pi, sizeof(pi) );
 
-    // Start the child process. 
+    // Start the child process.
     if( !CreateProcess( NULL,   // No module name (use command line)
         command,        // Command line
         NULL,           // Process handle not inheritable
@@ -24,10 +26,10 @@ int _tmain( int argc, TCHAR *argv[] )
         FALSE,          // Set handle inheritance to FALSE
         0,              // No creation flags
         NULL,           // Use parent's environment block
-        directory,           // Use parent's starting directory 
+        directory,           // Use parent's starting directory
         &si,            // Pointer to STARTUPINFO structure
         &pi )           // Pointer to PROCESS_INFORMATION structure
-    ) 
+    )
     {
         printf( "CreateProcess failed (%d).\n", GetLastError() );
         return 1;
@@ -36,7 +38,7 @@ int _tmain( int argc, TCHAR *argv[] )
     // Wait until child process exits.
     WaitForSingleObject( pi.hProcess, INFINITE );
 
-    // Close process and thread handles. 
+    // Close process and thread handles.
     CloseHandle( pi.hProcess );
     CloseHandle( pi.hThread );
 */
